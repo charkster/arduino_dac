@@ -1,17 +1,25 @@
+// these are common for all MCU
 #define DAC_PIN A0
+#define LSB 0.0032258 // 1 LSB is this voltage, 3.2258mV
 #define REGION1_LIMIT 1.0 // all voltages below this will have OFFSET1_ADJUST
 #define REGION2_LIMIT 2.0 // all voltages below this will have OFFSET2_ADJUST
-#define OFFSET1_ADJUST 0  // for voltage < REGION1_LIMIT
-#define OFFSET2_ADJUST 2  // for REGION1_LIMIT < voltage < REGION2_LIMIT 
-#define OFFSET3_ADJUST 4  // for voltage > REGION2_LIMIT
-#define LSB 0.0032258     // 1 LSB is this voltage, 3.2258mV
+
+// these are part specific offset adjustments, make negative if they are to be subtracted
+// this could be converted to a constant array if we have multiple parts to adjust
+#define OFFSET1_ADJUST 0 // for voltage < REGION1_LIMIT
+#define OFFSET2_ADJUST 2 // for REGION1_LIMIT < voltage < REGION2_LIMIT 
+#define OFFSET3_ADJUST 4 // for voltage > REGION2_LIMIT
 
 int offset_adjust;
+char unique_id[20];
 
 void setup() {
   Serial.begin(115200);
   while(!Serial);
   analogWrite(DAC_PIN, 0); // 10bit DAC, 0=0V, 512=1.65V, 1023=3.3V
+  Serial.print("Unique SAMD21 ID is: ");
+  samd21_unique_id(unique_id);
+  Serial.println(unique_id);
   Serial.println("Give DAC voltage between 0.0 and 3.3 (do not include V):");
 }
 
@@ -71,3 +79,20 @@ void loop() {
     }
   }
   delay(1000);
+}
+
+// placeholder for using different adjustments for different MCU parts
+void samd21_unique_id( char * id_buff )
+{   
+    volatile uint32_t val0, val1, val2, val3;
+    volatile uint32_t *val0_ptr = (volatile uint32_t *)0x0080A00C;
+    volatile uint32_t *val1_ptr = (volatile uint32_t *)0x0080A040;
+    volatile uint32_t *val2_ptr = (volatile uint32_t *)0x0080A044;
+    volatile uint32_t *val3_ptr = (volatile uint32_t *)0x0080A048;
+    val0 = *val0_ptr;
+    val1 = *val1_ptr;
+    val2 = *val2_ptr;
+    val3 = *val3_ptr;
+    static char format[] = "0x%08x%08x%08x%08x";
+    sprintf(id_buff, format,val0, val1, val2, val3);
+}
