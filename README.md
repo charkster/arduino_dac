@@ -7,4 +7,4 @@ OFFSET1_ADJUST is for voltages from 0.0V to REGION1_LIMIT, OFFSET2_ADJUST is for
 
 Included "samd21_unique_id" function to get a SAMD21's unique ID so that different offsets could be specified for specific MCU parts.
 
-The included arduino_dac.uf2 works on the SAMD21 QT PY and Seeeduino Xiao boards.
+The included arduino_dac.uf2 works on the SAMD21 QT PY and Seeeduino Xiao boards. This UF2 file has specific offset adjustments which only work on my part, so I am expecting people to edit the arduino_dac.ino file in the Arduino environment to specify their offset corrections. I was able to use an inexpensive hand-held meter to do the calibration... and I confirmed the calibration on a 6.5 digital DMM at work.
