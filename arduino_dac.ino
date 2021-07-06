@@ -98,15 +98,15 @@ void loop() {
 
 void samd21_unique_id( char * id_buff )
 {   
-    volatile uint32_t val0, val1, val2, val3;
-    volatile uint32_t *val0_ptr = (volatile uint32_t *)0x0080A00C;
-    volatile uint32_t *val1_ptr = (volatile uint32_t *)0x0080A040;
-    volatile uint32_t *val2_ptr = (volatile uint32_t *)0x0080A044;
-    volatile uint32_t *val3_ptr = (volatile uint32_t *)0x0080A048;
-    val0 = *val0_ptr;
-    val1 = *val1_ptr;
-    val2 = *val2_ptr;
-    val3 = *val3_ptr;
-    static char format[] = "0x%08x%08x%08x%08x";
-    sprintf(id_buff, format,val0, val1, val2, val3);
+  volatile uint32_t val0, val1, val2, val3;
+  volatile uint32_t *val0_ptr = (volatile uint32_t *)0x0080A00C;
+  volatile uint32_t *val1_ptr = (volatile uint32_t *)0x0080A040;
+  volatile uint32_t *val2_ptr = (volatile uint32_t *)0x0080A044;
+  volatile uint32_t *val3_ptr = (volatile uint32_t *)0x0080A048;
+  val0 = *val0_ptr;
+  val1 = *val1_ptr;
+  val2 = *val2_ptr;
+  val3 = *val3_ptr;
+  static char format[] = "0x%08x%08x%08x%08x";
+  sprintf(id_buff, format,val0, val1, val2, val3);
 }
