@@ -5,13 +5,14 @@
 #define REGION2_LIMIT 2.0 // all voltages below this will have OFFSET2_ADJUST
 
 // these are part specific offset adjustments, make negative if they are to be subtracted
-// this could be converted to a constant array if we have multiple parts to adjust
-#define OFFSET1_ADJUST 0 // for voltage < REGION1_LIMIT
-#define OFFSET2_ADJUST 2 // for REGION1_LIMIT < voltage < REGION2_LIMIT 
-#define OFFSET3_ADJUST 4 // for voltage > REGION2_LIMIT
+//                             0, 1, 2
+const int OFFSET1_ADJUST[3] = {0, 0, 1}; // for voltage < REGION1_LIMIT
+const int OFFSET2_ADJUST[3] = {0, 2, 1}; // for REGION1_LIMIT < voltage < REGION2_LIMIT 
+const int OFFSET3_ADJUST[3] = {0, 4, 3}; // for voltage > REGION2_LIMIT
 
+int offset_select;
 int offset_adjust;
-char unique_id[20];
+char unique_id[34];
 
 void setup() {
   Serial.begin(115200);
@@ -20,6 +21,20 @@ void setup() {
   Serial.print("Unique SAMD21 ID is: ");
   samd21_unique_id(unique_id);
   Serial.println(unique_id);
+  if (String(unique_id) == "0x0c85c77e5053574c342e3120ff031e18")
+  {
+    offset_select = 2;
+  }
+  else if (String(unique_id) == "0x7223766a50535154332e3120ff0b0732")
+  {
+    offset_select = 1;
+  }
+  else
+  {
+    offset_select = 0; // no offsets
+  }
+  Serial.print("Using offset_select: ");
+  Serial.println(offset_select);
   Serial.println("Give DAC voltage between 0.0 and 3.3 (do not include V):");
 }
 
@@ -40,12 +55,12 @@ void loop() {
       Serial.print(voltage_val,3);
       Serial.print("V ...DAC code is decimal ");
       Serial.print(dac_val);
-      if (dac_val > (1023 - OFFSET3_ADJUST))
+      if (dac_val > (1023 - OFFSET3_ADJUST[offset_select]))
       {
         Serial.print(" ...Error is within ");
-        Serial.print(OFFSET3_ADJUST+2);
+        Serial.print(OFFSET3_ADJUST[offset_select]+2);
         Serial.print(" LSB (");
-        Serial.print((OFFSET3_ADJUST+2)*LSB*1000);
+        Serial.print((OFFSET3_ADJUST[offset_select]+2)*LSB*1000);
         Serial.println("mV)");
       }
       else if (error == 0)
@@ -58,15 +73,15 @@ void loop() {
       }
       if (voltage_val < REGION1_LIMIT)
       {
-        offset_adjust = OFFSET1_ADJUST;
+        offset_adjust = OFFSET1_ADJUST[offset_select];
       }
       else if (voltage_val < REGION2_LIMIT)
       {
-        offset_adjust = OFFSET2_ADJUST;
+        offset_adjust = OFFSET2_ADJUST[offset_select];
       }
       else
       {
-        offset_adjust = OFFSET3_ADJUST;
+        offset_adjust = OFFSET3_ADJUST[offset_select];
       }
       if (dac_val < (1024 - offset_adjust))
       {
@@ -81,7 +96,6 @@ void loop() {
   delay(1000);
 }
 
-// placeholder for using different adjustments for different MCU parts
 void samd21_unique_id( char * id_buff )
 {   
     volatile uint32_t val0, val1, val2, val3;
